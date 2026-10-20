@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sales Predictor | CodeAlpha</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--text:#1c2333;--muted:#667085;--accent:#4f46e5;--border:#e4e7ec}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1420;--card:#171d2c;--text:#e8ecf5;--muted:#9aa4b8;--border:#2a3347}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:640px;margin:0 auto;padding:32px 16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+h1{margin:0 0 4px;font-size:1.6rem}p.sub{color:var(--muted);margin:0 0 20px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem}
+button{margin-top:20px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer}
+#result{font-size:1.5rem;font-weight:700;margin-top:18px;text-align:center}
+.err{color:#d92d20}table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:10px}
+td,th{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
+</style></head><body><main>
+<div class="card">
+<h1>Sales Predictor</h1>
+<p class="sub">Enter advertising spend (in thousands of dollars) to forecast sales.</p>
+<label for="tv">TV</label><input id="tv" type="number" min="0" step="0.1" value="150">
+<label for="radio">Radio</label><input id="radio" type="number" min="0" step="0.1" value="25">
+<label for="newspaper">Newspaper</label><input id="newspaper" type="number" min="0" step="0.1" value="30">
+<button id="go">Predict sales</button>
+<div id="result" aria-live="polite"></div>
+</div>
+{% if metrics %}
+<div class="card"><strong>Selected model: {{ metrics.best_model }}</strong>
+<table><tr><th>Model</th><th>CV R²</th><th>Test R²</th><th>RMSE</th></tr>
+{% for n, r in metrics.results.items() %}
+<tr><td>{{ n }}</td><td>{{ r.cv_r2_mean }}</td><td>{{ r.test_r2 }}</td><td>{{ r.test_rmse }}</td></tr>
+{% endfor %}</table></div>{% endif %}
+<script>
+document.getElementById('go').onclick=async()=>{
+ const out=document.getElementById('result');
+ const body={tv:tv.value,radio:radio.value,newspaper:newspaper.value};
+ try{
+  const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();
+  out.className=r.ok?'':'err';
+  out.textContent=r.ok?`Predicted sales: ${d.predicted_sales}k units`:d.error;
+ }catch(e){out.className='err';out.textContent='Request failed';}
+};
+</script></main></body></html>

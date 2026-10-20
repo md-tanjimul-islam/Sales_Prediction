@@ -1,0 +1,86 @@
+{
+  "best_model": "ElasticNet (engineered)",
+  "results": {
+    "Linear (raw features)": {
+      "cv_r2_mean": 0.8823,
+      "cv_r2_std": 0.0522,
+      "test_r2": 0.8994,
+      "test_mae": 1.4608,
+      "test_rmse": 1.7816,
+      "engineered": false
+    },
+    "Linear (engineered)": {
+      "cv_r2_mean": 0.9959,
+      "cv_r2_std": 0.0012,
+      "test_r2": 0.9956,
+      "test_mae": 0.2996,
+      "test_rmse": 0.3728,
+      "engineered": true
+    },
+    "Ridge (engineered)": {
+      "cv_r2_mean": 0.9958,
+      "cv_r2_std": 0.0012,
+      "test_r2": 0.9956,
+      "test_mae": 0.2996,
+      "test_rmse": 0.3728,
+      "engineered": true
+    },
+    "Lasso (engineered)": {
+      "cv_r2_mean": 0.9959,
+      "cv_r2_std": 0.0012,
+      "test_r2": 0.9957,
+      "test_mae": 0.2912,
+      "test_rmse": 0.3687,
+      "engineered": true
+    },
+    "ElasticNet (engineered)": {
+      "cv_r2_mean": 0.996,
+      "cv_r2_std": 0.0012,
+      "test_r2": 0.9957,
+      "test_mae": 0.2891,
+      "test_rmse": 0.3685,
+      "engineered": true
+    },
+    "Random Forest (tuned)": {
+      "cv_r2_mean": 0.9844,
+      "cv_r2_std": 0.0108,
+      "test_r2": 0.9913,
+      "test_mae": 0.4062,
+      "test_rmse": 0.5233,
+      "engineered": true
+    },
+    "Gradient Boosting (tuned)": {
+      "cv_r2_mean": 0.986,
+      "cv_r2_std": 0.0096,
+      "test_r2": 0.9914,
+      "test_mae": 0.3968,
+      "test_rmse": 0.5203,
+      "engineered": true
+    }
+  },
+  "channel_impact_per_unit": {
+    "TV": 0.0374,
+    "Radio": 0.1939,
+    "Newspaper": 0.001
+  },
+  "n_rows": 200,
+  "features": [
+    "TV",
+    "Radio",
+    "Newspaper",
+    "TV_Radio",
+    "TV_sq",
+    "Radio_sq",
+    "TV_log"
+  ],
+  "vif_base": {
+    "TV": 1.0,
+    "Radio": 1.14,
+    "Newspaper": 1.15
+  },
+  "final_cv_r2": 0.996,
+  "diagnostics": {
+    "residual_mean": 0.0016,
+    "residual_shapiro_p": 0.7896
+  }
+}

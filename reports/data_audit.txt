@@ -1,0 +1,18 @@
+Raw shape: (200, 5) | clean shape: (200, 4)
+Missing values (raw): {'Unnamed: 0': 0, 'TV': 0, 'Radio': 0, 'Newspaper': 0, 'Sales': 0}
+Duplicate rows (raw, excl. index): 0
+
+Column         skew   kurtosis  IQR-outliers  Shapiro-p
+TV            -0.07     -1.23            0      0.000
+Radio          0.09     -1.26            0      0.000
+Newspaper      0.89      0.60            2      0.000
+Sales          0.40     -0.43            0      0.002
+
+Pearson correlation with Sales:
+TV           0.782
+Radio        0.576
+Newspaper    0.228
+Sales        1.000
+
+VIF (base features): {'TV': 1.0, 'Radio': 1.14, 'Newspaper': 1.15}
+Outlier decision: the Newspaper outliers are valid spend values; they were kept (Newspaper has ~no effect on the model, verified by CV).
