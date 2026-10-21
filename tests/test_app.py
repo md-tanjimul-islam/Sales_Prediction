@@ -42,3 +42,19 @@ def test_api_ok(client):
 
 def test_api_bad_input(client):
     assert client.post("/api/predict", json={"tv": "x"}).status_code == 400
+
+
+def test_api_details(client):
+    d = client.post("/api/predict", json={"tv": 150, "radio": 25, "newspaper": 30}).json
+    assert d["range_low"] < d["predicted_sales"] < d["range_high"]
+    assert set(d["gain_per_10k"]) == {"TV", "Radio", "Newspaper"}
+    assert d["insights"] and len(d["curves"]["TV"]) == 31
+
+
+def test_out_of_range_warning(client):
+    d = client.post("/api/predict", json={"tv": 900, "radio": 25, "newspaper": 30}).json
+    assert d["warnings"]
+
+
+def test_meta(client):
+    assert client.get("/api/meta").json["stats"]["n"] == 200

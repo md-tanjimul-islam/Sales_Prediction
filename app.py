@@ -1,7 +1,7 @@
 """Flask web app + JSON API for sales prediction."""
 import os
 from flask import Flask, jsonify, render_template, request
-from src.predict import load_metrics, predict_sales
+from src.predict import dataset_stats, explain, load_metrics
 
 app = Flask(__name__)
 
@@ -15,7 +15,7 @@ def _parse(payload):
 
 @app.get("/")
 def index():
-    return render_template("index.html", metrics=load_metrics())
+    return render_template("index.html", metrics=load_metrics(), stats=dataset_stats())
 
 
 @app.get("/health")
@@ -23,12 +23,18 @@ def health():
     return jsonify(status="ok")
 
 
+@app.get("/api/meta")
+def meta():
+    return jsonify(stats=dataset_stats(), metrics=load_metrics())
+
+
 @app.post("/api/predict")
 def api_predict():
     try:
         tv, radio, news = _parse(request.get_json(silent=True) or request.form)
-        return jsonify(predicted_sales=round(predict_sales(tv, radio, news), 2),
-                       unit="thousand units")
+        if min(tv, radio, news) < 0 or max(tv, radio, news) > 1e5:
+            raise ValueError("Spend values must be between 0 and 100000")
+        return jsonify(explain(tv, radio, news))
     except ValueError as e:
         return jsonify(error=str(e)), 400
 

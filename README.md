@@ -6,6 +6,12 @@ Built for the **CodeAlpha Data Science Internship — Task 4: Sales Prediction u
 The project covers the full workflow: data cleaning, exploratory analysis, feature engineering,
 model comparison with cross-validation, business insights, and deployment as a web app and JSON API.
 
+## Live demo
+
+**https://codealpha-sales-prediction.onrender.com**
+
+(Hosted on Render's free plan, so the first load after inactivity can take about 50 seconds. Health check: `/health`.)
+
 ## Features
 
 - **Data cleaning** – drops the row-ID column, strips names, coerces to numeric, removes duplicates, missing and impossible (negative) values (`src/features.py`)
@@ -16,7 +22,9 @@ model comparison with cross-validation, business insights, and deployment as a w
 - **Reliable evaluation** – repeated 5×5 cross-validation, a held-out 20% test set, nested CV for tuned models; the model is chosen by CV, never by test score
 - **Diagnostics** – actual vs predicted, residual histogram and Q-Q plot, model comparison chart
 - **Advertising impact analysis** – estimated sales change per extra unit of spend on each channel
-- **Web app** (`/`), **REST API** (`POST /api/predict`, `GET /health`) and **CLI** (`python -m src.predict --tv 150 --radio 25 --newspaper 30`)
+- **Interactive web dashboard** – sliders and presets with live prediction, responsive layout, automatic dark mode
+- **Explained predictions** – every forecast includes a 95% likely range, comparison with the dataset average, channel contribution, what-if for +$10k per channel, plain-language insights, an interactive response curve, and warnings when inputs fall outside the training range
+- **REST API** (`POST /api/predict`, `GET /api/meta`, `GET /health`) and **CLI** (`python -m src.predict --tv 150 --radio 25 --newspaper 30`)
 - **Tests** (pytest) and **Render blueprint** (`render.yaml`)
 
 ## Results
@@ -52,7 +60,7 @@ CodeAlpha_Sales_Prediction/
 │   ├── features.py        # loading + feature engineering
 │   ├── train.py           # EDA, training, evaluation, saving
 │   └── predict.py         # prediction helper + CLI
-├── templates/index.html   # web UI
+├── templates/index.html   # interactive dashboard
 ├── tests/test_app.py      # pytest suite
 ├── models/                # saved model + metrics.json
 ├── reports/               # generated plots + data_audit.txt
@@ -77,10 +85,31 @@ python app.py                    # open http://localhost:5000
 curl -X POST http://localhost:5000/api/predict \
   -H "Content-Type: application/json" \
   -d '{"tv": 150, "radio": 25, "newspaper": 30}'
-# {"predicted_sales": 15.02, "unit": "thousand units"}
 ```
 
-Invalid input returns HTTP 400 with an error message.
+Response (curves omitted):
+
+```json
+{
+  "predicted_sales": 15.02, "unit": "thousand units",
+  "range_low": 14.29, "range_high": 15.74,
+  "total_spend": 205.0, "sales_per_1k_spend": 0.073,
+  "vs_average_pct": 7.1, "dataset_mean_sales": 14.02,
+  "channel_removal_effect": {"TV": 14.27, "Radio": 4.87, "Newspaper": 0.01},
+  "gain_per_10k": {"TV": 0.385, "Radio": 2.004, "Newspaper": 0.004},
+  "best_channel": "Radio",
+  "insights": ["..."], "warnings": []
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `range_low` / `range_high` | Approximate 95% range, from hold-out error (±1.96 × RMSE) |
+| `channel_removal_effect` | Sales lost if that channel were switched off |
+| `gain_per_10k` | Extra sales from adding $10k to that channel |
+| `warnings` | Inputs outside the training data range |
+
+Invalid input returns HTTP 400 with an error message. `GET /api/meta` returns dataset statistics and model metrics.
 
 ## Dataset
 

@@ -1,45 +1,183 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sales Predictor | CodeAlpha</title>
+<title>Sales Predictor | Advertising Spend Forecasting</title>
+<meta name="description" content="Machine-learning sales forecasting from TV, Radio and Newspaper advertising spend.">
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--text:#1c2333;--muted:#667085;--accent:#4f46e5;--border:#e4e7ec}
-@media(prefers-color-scheme:dark){:root{--bg:#0f1420;--card:#171d2c;--text:#e8ecf5;--muted:#9aa4b8;--border:#2a3347}}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-main{max-width:640px;margin:0 auto;padding:32px 16px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
-h1{margin:0 0 4px;font-size:1.6rem}p.sub{color:var(--muted);margin:0 0 20px}
-label{display:block;font-weight:600;margin:14px 0 6px}
-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem}
-button{margin-top:20px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer}
-#result{font-size:1.5rem;font-weight:700;margin-top:18px;text-align:center}
-.err{color:#d92d20}table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:10px}
-td,th{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
-</style></head><body><main>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#5f6b85;--border:#e3e8f2;--accent:#4f46e5;--accent2:#7c3aed;--good:#059669;--warn:#b45309;--warnbg:#fef3c7;--tv:#4f46e5;--radio:#0ea5e9;--news:#f59e0b;--shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05)}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1220;--card:#151c2f;--text:#e8ecf6;--muted:#9aa6c0;--border:#27314a;--accent:#818cf8;--accent2:#a78bfa;--good:#34d399;--warn:#fbbf24;--warnbg:#3a2f12;--shadow:none}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.nav a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:20px}.nav a:hover{color:var(--text)}
+.hero{padding:44px 0 24px}
+.hero h1{font-size:clamp(1.8rem,4vw,2.7rem);letter-spacing:-.03em;margin:0 0 10px;line-height:1.15}
+.hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:640px;margin:0;font-size:1.05rem}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-size:.8rem;color:var(--muted)}
+.badge b{color:var(--text)}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;margin:20px 0}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+.card h2{font-size:1.05rem;margin:0 0 4px}.card .sub{color:var(--muted);font-size:.85rem;margin:0 0 16px}
+.field{margin-bottom:18px}.field .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.field label{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%}
+.field input[type=number]{width:96px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:.95rem;text-align:right}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.presets{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.presets button,.tabs button{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:6px 12px;font-size:.82rem;cursor:pointer}
+.presets button:hover,.tabs button.on{border-color:var(--accent);color:var(--accent)}
+.cta{width:100%;padding:12px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:1rem;cursor:pointer}
+.cta:hover{filter:brightness(1.08)}.hint{font-size:.78rem;color:var(--muted);margin-top:10px}
+.result-top{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between}
+.big{font-size:3rem;font-weight:800;letter-spacing:-.03em;line-height:1}.big small{font-size:1rem;font-weight:500;color:var(--muted);margin-left:6px}
+.label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:600}
+.up{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)}.down{background:color-mix(in srgb,#dc2626 14%,transparent);color:#dc2626}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px}.stat b{display:block;font-size:1.2rem}.stat span{font-size:.78rem;color:var(--muted)}
+.bars .b{margin-bottom:12px}.bars .meta{display:flex;justify-content:space-between;font-size:.86rem;margin-bottom:4px}
+.track{height:10px;background:var(--bg);border-radius:999px;overflow:hidden;border:1px solid var(--border)}.fill{height:100%;border-radius:999px;transition:width .4s}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:700px){.two{grid-template-columns:1fr}}
+ul.ins{margin:0;padding:0;list-style:none}ul.ins li{padding:10px 12px 10px 14px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 8px 8px 0;margin-bottom:8px;font-size:.9rem}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:14px}
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--muted);font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}td,th{padding:9px 10px;border-bottom:1px solid var(--border);text-align:left}th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+tr.best td{font-weight:700;color:var(--accent)}
+section{margin:36px 0}section>h2{font-size:1.3rem;letter-spacing:-.02em;margin:0 0 14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.step b{display:block;margin-bottom:4px}.step span{font-size:.88rem;color:var(--muted)}
+.num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:8px}
+footer{border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:.85rem;margin-top:40px}
+.err{color:#dc2626;font-weight:600}.skeleton{opacity:.5}
+</style></head><body>
+<header class="nav"><div class="wrap"><div class="brand"><div class="logo"></div>SalesPredictor</div>
+<nav><a href="#predict">Predict</a><a href="#model">Model</a><a href="#how">How it works</a></nav></div></header>
+
+<main class="wrap">
+<div class="hero">
+<h1>Forecast sales from <span>advertising spend</span></h1>
+<p>Move the sliders to set your TV, Radio and Newspaper budgets. The model predicts sales instantly and explains which channel drives the result.</p>
+<div class="badges">
+<span class="badge">Model: <b>{{ metrics.best_model if metrics else 'n/a' }}</b></span>
+{% if metrics %}<span class="badge">Accuracy (R²): <b>{{ metrics.final_cv_r2 }}</b></span>{% endif %}
+<span class="badge">Trained on <b>{{ stats.n }}</b> markets</span>
+<span class="badge">Spend in <b>$ thousands</b> · Sales in <b>thousand units</b></span>
+</div></div>
+
+<div class="grid" id="predict">
 <div class="card">
-<h1>Sales Predictor</h1>
-<p class="sub">Enter advertising spend (in thousands of dollars) to forecast sales.</p>
-<label for="tv">TV</label><input id="tv" type="number" min="0" step="0.1" value="150">
-<label for="radio">Radio</label><input id="radio" type="number" min="0" step="0.1" value="25">
-<label for="newspaper">Newspaper</label><input id="newspaper" type="number" min="0" step="0.1" value="30">
-<button id="go">Predict sales</button>
-<div id="result" aria-live="polite"></div>
+<h2>Advertising budget</h2><p class="sub">Spend per channel, in thousands of dollars.</p>
+<div class="presets" aria-label="Presets">
+<button type="button" data-p="low">Low budget</button><button type="button" data-p="avg">Average</button><button type="button" data-p="high">High budget</button><button type="button" data-p="radio">Radio focus</button>
 </div>
+{% for ch, color in [('TV','var(--tv)'),('Radio','var(--radio)'),('Newspaper','var(--news)')] %}
+<div class="field"><div class="row"><label for="n-{{ ch }}"><span class="dot" style="background:{{ color }}"></span>{{ ch }}</label>
+<input type="number" id="n-{{ ch }}" min="0" step="0.1"></div>
+<input type="range" id="r-{{ ch }}" min="{{ stats.ranges[ch][0]|round(0,'floor')|int }}" max="{{ stats.ranges[ch][1]|round(0,'ceil')|int }}" step="0.1" aria-label="{{ ch }} spend">
+<div class="hint">Typical range {{ stats.ranges[ch][0] }}–{{ stats.ranges[ch][1] }} · average {{ stats.means[ch]|round(1) }}</div></div>
+{% endfor %}
+<button class="cta" id="go">Predict sales</button>
+<div class="hint">Results update automatically as you move the sliders.</div>
+</div>
+
+<div>
+<div class="card" id="out">
+<div id="warn"></div>
+<div class="result-top">
+<div><div class="label">Predicted sales</div><div class="big"><span id="pred">–</span><small>thousand units</small></div>
+<div style="margin-top:10px;color:var(--muted);font-size:.9rem">Likely range (95%): <b id="range" style="color:var(--text)">–</b></div></div>
+<div><div class="label">Versus dataset average</div><span class="pill up" id="vs">–</span></div>
+</div>
+<div class="stats">
+<div class="stat"><b id="total">–</b><span>Total ad spend ($k)</span></div>
+<div class="stat"><b id="eff">–</b><span>Sales per $1k spent</span></div>
+<div class="stat"><b id="best">–</b><span>Best channel for next $10k</span></div>
+</div>
+<div id="err" class="err"></div>
+</div>
+
+<div class="two" style="margin-top:20px">
+<div class="card"><h2>What each channel contributes</h2><p class="sub">Sales lost if the channel were switched off.</p><div class="bars" id="removal"></div></div>
+<div class="card"><h2>What if you add $10k?</h2><p class="sub">Extra sales from +$10k on a single channel.</p><div class="bars" id="gain"></div></div>
+</div>
+
+<div class="card" style="margin-top:20px"><h2>Why this prediction</h2><p class="sub">Plain-language takeaways for your budget.</p><ul class="ins" id="ins"></ul></div>
+
+<div class="card" style="margin-top:20px"><h2>Response curve</h2><p class="sub">How sales change as one channel's spend changes, with the others held at your values.</p>
+<div class="tabs"><button class="on" data-c="TV">TV</button><button data-c="Radio">Radio</button></div>
+<svg id="chart" viewBox="0 0 640 260" role="img" aria-label="Sales response curve"></svg></div>
+</div></div>
+
+<section id="model"><h2>Model performance</h2>
+<div class="card">
 {% if metrics %}
-<div class="card"><strong>Selected model: {{ metrics.best_model }}</strong>
-<table><tr><th>Model</th><th>CV R²</th><th>Test R²</th><th>RMSE</th></tr>
-{% for n, r in metrics.results.items() %}
-<tr><td>{{ n }}</td><td>{{ r.cv_r2_mean }}</td><td>{{ r.test_r2 }}</td><td>{{ r.test_rmse }}</td></tr>
-{% endfor %}</table></div>{% endif %}
+<p class="sub">Compared with repeated 5×5 cross-validation and a held-out test set. The best model is chosen by cross-validation only.</p>
+<div style="overflow-x:auto"><table><tr><th>Model</th><th>CV R²</th><th>Test R²</th><th>Test RMSE</th><th>Test MAE</th></tr>
+{% for n, r in metrics.results.items() %}<tr class="{{ 'best' if n == metrics.best_model else '' }}"><td>{{ n }}{% if n == metrics.best_model %} ✓{% endif %}</td><td>{{ r.cv_r2_mean }}</td><td>{{ r.test_r2 }}</td><td>{{ r.test_rmse }}</td><td>{{ r.test_mae }}</td></tr>{% endfor %}
+</table></div>
+<p class="hint">R² close to 1 means the model explains nearly all variation in sales. RMSE and MAE are in thousand units.</p>
+{% else %}<p class="sub">Run <code>python -m src.train</code> to generate model metrics.</p>{% endif %}
+</div></section>
+
+<section id="how"><h2>How it works</h2>
+<div class="steps">
+<div class="card step"><div class="num">1</div><b>Clean the data</b><span>Remove ID columns, duplicates, missing and invalid values; check outliers and skew.</span></div>
+<div class="card step"><div class="num">2</div><b>Engineer features</b><span>TV×Radio interaction, squared terms and log(TV) capture synergy and diminishing returns.</span></div>
+<div class="card step"><div class="num">3</div><b>Compare models</b><span>Linear, Ridge, Lasso, ElasticNet, Random Forest and Gradient Boosting, tuned and cross-validated.</span></div>
+<div class="card step"><div class="num">4</div><b>Explain predictions</b><span>Each forecast comes with a range, channel contributions and what-if budget moves.</span></div>
+</div>
+<p class="hint" style="margin-top:14px">The data is observational, so impact figures are estimates rather than guaranteed causal effects. Predictions outside the training ranges are less reliable.</p>
+</section>
+</main>
+<footer><div class="wrap">CodeAlpha Data Science Internship · Task 4: Sales Prediction using Python · Built with scikit-learn and Flask</div></footer>
+
 <script>
-document.getElementById('go').onclick=async()=>{
- const out=document.getElementById('result');
- const body={tv:tv.value,radio:radio.value,newspaper:newspaper.value};
- try{
-  const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const d=await r.json();
-  out.className=r.ok?'':'err';
-  out.textContent=r.ok?`Predicted sales: ${d.predicted_sales}k units`:d.error;
- }catch(e){out.className='err';out.textContent='Request failed';}
-};
-</script></main></body></html>
+const S={{ stats|tojson }};
+const COL={TV:'var(--tv)',Radio:'var(--radio)',Newspaper:'var(--news)'};
+const CH=['TV','Radio','Newspaper'];
+const $=id=>document.getElementById(id);
+let curve='TV',last=null,timer=null;
+const P={low:[40,8,10],avg:[S.means.TV,S.means.Radio,S.means.Newspaper],high:[250,40,60],radio:[80,45,5]};
+function setVals(a){CH.forEach((c,i)=>{const v=+(+a[i]).toFixed(1);$('n-'+c).value=v;$('r-'+c).value=v;});}
+function vals(){return Object.fromEntries(CH.map(c=>[c.toLowerCase(),parseFloat($('n-'+c).value)||0]));}
+function bars(el,data,fmt){const m=Math.max(...Object.values(data).map(Math.abs),1e-9);
+ $(el).innerHTML=CH.map(c=>`<div class="b"><div class="meta"><span>${c}</span><b>${fmt(data[c])}</b></div><div class="track"><div class="fill" style="width:${Math.max(Math.abs(data[c])/m*100,1.5)}%;background:${COL[c]}"></div></div></div>`).join('');}
+function chart(){
+ if(!last)return;const pts=last.curves[curve],W=640,H=260,L=44,R=14,T=14,B=34;
+ const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);const x0=Math.min(...xs),x1=Math.max(...xs);
+ const y0=Math.floor(Math.min(...ys,last.predicted_sales)-1),y1=Math.ceil(Math.max(...ys,last.predicted_sales)+1);
+ const X=x=>L+(x-x0)/(x1-x0)*(W-L-R),Y=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+ let g='';for(let i=0;i<=4;i++){const y=y0+(y1-y0)*i/4;g+=`<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="var(--border)"/><text x="${L-6}" y="${Y(y)+4}" text-anchor="end">${y.toFixed(0)}</text>`;}
+ for(let i=0;i<=4;i++){const x=x0+(x1-x0)*i/4;g+=`<text x="${X(x)}" y="${H-12}" text-anchor="middle">${x.toFixed(0)}</text>`;}
+ const d=pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+ const cx=Math.min(Math.max(last.inputs[curve],x0),x1);
+ $('chart').innerHTML=g+`<path d="${d}" fill="none" stroke="${COL[curve]}" stroke-width="3" stroke-linecap="round"/><line x1="${X(cx)}" x2="${X(cx)}" y1="${T}" y2="${H-B}" stroke="${COL[curve]}" stroke-dasharray="4 4" opacity=".6"/><circle cx="${X(cx)}" cy="${Y(last.predicted_sales)}" r="6" fill="${COL[curve]}" stroke="var(--card)" stroke-width="2"/><text x="${W/2}" y="${H-1}" text-anchor="middle">${curve} spend ($k)</text><text x="12" y="${H/2}" transform="rotate(-90 12 ${H/2})" text-anchor="middle">Sales (k units)</text>`;}
+function render(d){last=d;$('out').classList.remove('skeleton');$('err').textContent='';
+ $('pred').textContent=d.predicted_sales.toFixed(2);$('range').textContent=d.range_low.toFixed(1)+' – '+d.range_high.toFixed(1);
+ const v=$('vs');v.textContent=(d.vs_average_pct>=0?'+':'')+d.vs_average_pct+'% vs avg ('+d.dataset_mean_sales+')';v.className='pill '+(d.vs_average_pct>=0?'up':'down');
+ $('total').textContent='$'+d.total_spend.toFixed(1)+'k';$('eff').textContent=d.sales_per_1k_spend==null?'–':d.sales_per_1k_spend.toFixed(3);$('best').textContent=d.best_channel;
+ $('warn').innerHTML=d.warnings.map(w=>`<div class="warn">⚠ ${w}</div>`).join('');
+ bars('removal',d.channel_removal_effect,x=>x.toFixed(2)+'k units');bars('gain',d.gain_per_10k,x=>(x>=0?'+':'')+x.toFixed(2)+'k units');
+ $('ins').innerHTML=d.insights.map(t=>`<li>${t}</li>`).join('');chart();}
+async function predict(){
+ $('out').classList.add('skeleton');
+ try{const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(vals())});
+  const d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');render(d);}
+ catch(e){$('out').classList.remove('skeleton');$('err').textContent=e.message;}}
+const later=()=>{clearTimeout(timer);timer=setTimeout(predict,200);};
+CH.forEach(c=>{
+ $('r-'+c).addEventListener('input',e=>{$('n-'+c).value=e.target.value;later();});
+ $('n-'+c).addEventListener('input',e=>{$('r-'+c).value=e.target.value;later();});});
+document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{setVals(P[b.dataset.p]);predict();});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{curve=b.dataset.c;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));chart();});
+$('go').onclick=predict;
+setVals([150,25,30]);predict();
+</script></body></html>
