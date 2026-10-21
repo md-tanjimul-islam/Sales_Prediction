@@ -60,7 +60,7 @@ def explain(tv: float, radio: float, newspaper: float) -> dict:
         up = dict(vals); up[c] += 10.0
         removal[c] = round(base - _pred(off), 2)      # sales lost if this channel were switched off
         marginal[c] = round(_pred(up) - base, 3)       # sales gained from +10k on this channel
-    best = max(marginal, key=marginal.get)
+    best = max(marginal, key=lambda c: marginal[c])
     total = tv + radio + newspaper
 
     warnings = [f"{c} spend ({vals[c]:g}) is outside the range seen in training data "
