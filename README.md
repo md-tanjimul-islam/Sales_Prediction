@@ -119,6 +119,7 @@ Invalid input returns HTTP 400 with an error message. `GET /api/meta` returns da
 
 Python, pandas, NumPy, scikit-learn, Matplotlib, Seaborn, Flask, Gunicorn, pytest.
 
-## Author
+## 👤 Author
 
-Tanjimul — CodeAlpha Data Science Intern
+**Md. Tanjimul Islam** — Data Science Intern at CodeAlpha
+GitHub: [md-tanjimul-islam](https://github.com/md-tanjimul-islam)
