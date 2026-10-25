@@ -8,7 +8,7 @@ model comparison with cross-validation, business insights, and deployment as a w
 
 ## Live demo
 
-**https://codealpha-sales-prediction.onrender.com**
+**[https://codealpha-sales-prediction.onrender.com](https://sales-prediction-g2aj.onrender.com/)**
 
 (Hosted on Render's free plan, so the first load after inactivity can take about 50 seconds. Health check: `/health`.)
 
